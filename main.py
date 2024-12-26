@@ -12,7 +12,6 @@ from utils.paths import CLIENT_CSV, SANDAL_CSV, SALE_CSV, CSV_FILES_PATH, ZIP_FI
 app = FastAPI()
 
 # Repositories
-# soltar theads pra cerregar cada csv
 client_repository = ClientRepository(CLIENT_CSV)
 sandal_repository = SandalRepository(SANDAL_CSV)
 sale_repository = SaleRepository(SALE_CSV, sandal_repository, client_repository)
