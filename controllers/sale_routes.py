@@ -1,106 +1,94 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlmodel import Session
 
+from database.database import get_Session
 from models import Sale
-from services import SaleService
+from repositories import SaleRepository, SandalRepository, ClientRepository
+from services import SaleService, SandalService, ClientService
 
 
-class SalesRoutes:
+def get_sale_service(session: Session = Depends(get_Session)) -> SaleService:
+    return SaleService(SaleRepository(session), ClientService(ClientRepository(session)), SandalService(SandalRepository(session)))
+
+sale_router = APIRouter(prefix="/sales", tags=["sales"])
+
+@sale_router.post("/")
+def create_sale( sale: Sale,service = Depends(get_sale_service)):
     """
-    Classe responsável por definir as rotas relacionadas às vendas.
+    Cria uma nova venda.
 
-    Attributes:
-        router (APIRouter): Objeto para gerenciar as rotas do FastAPI.
-        service (SaleService): Serviço responsável por implementar a lógica das operações.
+    Args:
+        sale (Sale): Objeto contendo os dados da venda.
+
+    Returns:
+        object: Resultado da operação de criação.
     """
+    return service.create(sale)
 
-    def __init__(self, service: SaleService):
-        """
-        Args:
-            service (SaleService): Instância do serviço responsável pelas operações
-                relacionadas às vendas.
-        """
-        self.router = APIRouter()
-        self.service = service
-        self._add_routes()
+@sale_router.get("/")
+def list_sale(service = Depends(get_sale_service)):
+    """
+    Lista todas as vendas.
 
-    def _add_routes(self):
-        """
-        Registra as rotas da API relacionadas às vendas.
-        """
-        self.router.add_api_route("/sales", self.create_sale, methods=["POST"])
-        self.router.add_api_route("/sales", self.list_sale, methods=["GET"])
-        self.router.add_api_route(
-            "/sales/{sale_id}", self.search_sale_id, methods=["GET"]
-        )
-        self.router.add_api_route("/sales/{sale_id}", self.update_sale, methods=["PUT"])
-        self.router.add_api_route(
-            "/sales/{sale_id}", self.delete_sale, methods=["DELETE"]
-        )
-        self.router.add_api_route("/sales/total/", self.count_sales, methods=["GET"])
+    Returns:
+        List[object]: Lista de vendas cadastradas.
+    """
+    return service.list()
 
-    def create_sale(self, sale: Sale):
-        """
-        Cria uma nova venda.
+@sale_router.get("/{sale_id}")
+def search_sale_id( sale_id: int,service = Depends(get_sale_service)):
+    """
+    Busca uma venda pelo ID.
 
-        Args:
-            sale (Sale): Objeto contendo os dados da venda.
+    Args:
+        sale_id (int): ID da venda a ser buscada.
 
-        Returns:
-            object: Resultado da operação de criação.
-        """
-        return self.service.create(sale)
+    Returns:
+        object: Venda encontrada ou `None` se não encontrada.
+    """
+    return service.search_sale(sale_id)
 
-    def list_sale(self):
-        """
-        Lista todas as vendas.
+@sale_router.put("/{sale_id}")
+def update_sale(sale: Sale, sale_id: int,service = Depends(get_sale_service)):
+    """
+    Atualiza as informações de uma venda existente.
 
-        Returns:
-            List[object]: Lista de vendas cadastradas.
-        """
-        return self.service.list()
+    Args:
+        sale (Sale): Objeto contendo os dados atualizados da venda.
+        sale_id (int): ID da venda a ser atualizada.
 
-    def search_sale_id(self, sale_id: int):
-        """
-        Busca uma venda pelo ID.
+    Returns:
+        object: Resultado da operação de atualização.
+    """
+    return service.update(sale_id, sale)
 
-        Args:
-            sale_id (int): ID da venda a ser buscada.
+@sale_router.delete("/{sale_id}")
+def delete_sale(sale_id: int, service = Depends(get_sale_service)):
+    """
+    Exclui uma venda pelo ID.
 
-        Returns:
-            object: Venda encontrada ou `None` se não encontrada.
-        """
-        return self.service.search_sale(sale_id)
+    Args:
+        sale_id (int): ID da venda a ser excluída.
 
-    def update_sale(self, sale: Sale, sale_id: int):
-        """
-        Atualiza as informações de uma venda existente.
+    Returns:
+        object: Resultado da operação de exclusão.
+    """
+    return service.delete(sale_id)
 
-        Args:
-            sale (Sale): Objeto contendo os dados atualizados da venda.
-            sale_id (int): ID da venda a ser atualizada.
+@sale_router.get("/total")
+def count_sales(service = Depends(get_sale_service)):
+    """
+    Conta o número total de vendas registradas.
 
-        Returns:
-            object: Resultado da operação de atualização.
-        """
-        return self.service.update(sale_id, sale)
+    Returns:
+        int: Total de vendas registradas.
+    """
+    return service.count()
 
-    def delete_sale(self, sale_id: int):
-        """
-        Exclui uma venda pelo ID.
+@sale_router.post("/{sale_id}/sandals/{sandal_id}/client/{client_id}")
+def sale_sandal_for_client(sale_id: int,sandal_id: int,  client_id: int,quantity: int, service = Depends(get_sale_service)):
+    return service.sale_sandal_for_client(sale_id, sandal_id, client_id,quantity)
 
-        Args:
-            sale_id (int): ID da venda a ser excluída.
-
-        Returns:
-            object: Resultado da operação de exclusão.
-        """
-        return self.service.delete(sale_id)
-
-    def count_sales(self):
-        """
-        Conta o número total de vendas registradas.
-
-        Returns:
-            int: Total de vendas registradas.
-        """
-        return self.service.count()
+@sale_router.get("/{sale_id}/sandals/")
+def sandals_by_sale(sale_id: int, service = Depends(get_sale_service)):
+    return service.sandals_by_sale(sale_id)

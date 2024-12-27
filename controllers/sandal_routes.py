@@ -1,98 +1,76 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlmodel import Session
 
+from database.database import get_Session
 from models import Sandal
+from repositories import SandalRepository
 from services import SandalService
 
 
-class SandalRoutes:
+def get_sandal_service(session: Session = Depends(get_Session)):
+    return SandalService(SandalRepository(session))
+
+sandal_router = APIRouter(prefix="/sandals", tags=["sandals"])
+
+@sandal_router.post("/", response_model=Sandal)
+def create_sandal(sandal: Sandal, service = Depends(get_sandal_service)):
     """
-    Classe responsável por definir as rotas relacionadas a sandálias.
+    Cria uma nova sandália.
 
-    Attributes:
-        router (APIRouter): Objeto para gerenciar as rotas do FastAPI.
-        service (SandalService): Serviço responsável por implementar a lógica das operações.
+    Args:
+        sandal (Sandal): Objeto contendo os dados da sandália.
+
+    Returns:
+        object: Resultado da operação de criação.
     """
+    return service.create(sandal)
 
-    def __init__(self, sandal_service: SandalService):
-        """
-        Args:
-            sandal_service (SandalService): Instância do serviço responsável pelas operações
-                relacionadas a sandálias.
-        """
-        self.router = APIRouter()
-        self.service = sandal_service
-        self._add_routes()
+@sandal_router.get("/")
+def list_sandal(service: SandalService = Depends(get_sandal_service)):
+    """
+    Lista todas as sandálias.
 
-    def _add_routes(self):
-        """
-        Registra as rotas da API relacionadas a sandálias.
-        """
-        self.router.add_api_route("/sandals", self.create_sandal, methods=["POST"])
-        self.router.add_api_route("/sandals", self.list_sandal, methods=["GET"])
-        self.router.add_api_route(
-            "/sandals/{sandal_id}", self.search_sandal_id, methods=["GET"]
-        )
-        self.router.add_api_route(
-            "/sandals/{sandal_id}", self.update_sandal, methods=["PUT"]
-        )
-        self.router.add_api_route(
-            "/sandals/{sandal_id}", self.delete_sandal, methods=["DELETE"]
-        )
+    Returns:
+        List[object]: Lista de sandálias cadastradas.
+    """
+    return service.list()
 
-    def create_sandal(self, sandal: Sandal):
-        """
-        Cria uma nova sandália.
+@sandal_router.get("/{sandal_id}")
+def search_sandal_id(sandal_id: int, service: SandalService = Depends(get_sandal_service)):
+    """
+    Busca uma sandália pelo ID.
 
-        Args:
-            sandal (Sandal): Objeto contendo os dados da sandália.
+    Args:
+        sandal_id (int): ID da sandália a ser buscada.
 
-        Returns:
-            object: Resultado da operação de criação.
-        """
-        return self.service.create(sandal)
+    Returns:
+        object: Sandália encontrada ou `None` se não encontrada.
+    """
+    return service.search_sandal(sandal_id)
 
-    def list_sandal(self):
-        """
-        Lista todas as sandálias.
+@sandal_router.put("/{sandal_id}")
+def update_sandal(sandal: Sandal, sandal_id: int, service: SandalService = Depends(get_sandal_service)):
+    """
+    Atualiza as informações de uma sandália existente.
 
-        Returns:
-            List[object]: Lista de sandálias cadastradas.
-        """
-        return self.service.list()
+    Args:
+        sandal (Sandal): Objeto contendo os dados atualizados da sandália.
+        sandal_id (int): ID da sandália a ser atualizada.
 
-    def search_sandal_id(self, sandal_id: int):
-        """
-        Busca uma sandália pelo ID.
+    Returns:
+        object: Resultado da operação de atualização.
+    """
+    return service.update(sandal_id, sandal)
 
-        Args:
-            sandal_id (int): ID da sandália a ser buscada.
+@sandal_router.delete("/{sandal_id}")
+def delete_sandal(sandal_id: int, service: SandalService = Depends(get_sandal_service)):
+    """
+    Exclui uma sandália pelo ID.
 
-        Returns:
-            object: Sandália encontrada ou `None` se não encontrada.
-        """
-        return self.service.search_sandal(sandal_id)
+    Args:
+        sandal_id (int): ID da sandália a ser excluída.
 
-    def update_sandal(self, sandal: Sandal, sandal_id: int):
-        """
-        Atualiza as informações de uma sandália existente.
-
-        Args:
-            sandal (Sandal): Objeto contendo os dados atualizados da sandália.
-            sandal_id (int): ID da sandália a ser atualizada.
-
-        Returns:
-            object: Resultado da operação de atualização.
-        """
-        return self.service.update(sandal_id, sandal)
-
-    def delete_sandal(self, sandal_id: int):
-        """
-        Exclui uma sandália pelo ID.
-
-        Args:
-            sandal_id (int): ID da sandália a ser excluída.
-
-        Returns:
-            object: Resultado da operação de exclusão.
-        """
-        return self.service.delete(sandal_id)
+    Returns:
+        object: Resultado da operação de exclusão.
+    """
+    return service.delete(sandal_id)

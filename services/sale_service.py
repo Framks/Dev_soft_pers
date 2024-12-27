@@ -1,83 +1,29 @@
-from models import Sale
+from exceptions import NotFoundException, InvalidArgumentException
+from models import Sale, SandalSale
 from repositories import SaleRepository
+from services import ClientService, SandalService
 
 
 class SaleService:
-    """
-    Serviço que gerencia operações relacionadas a vendas, incluindo a criação, pesquisa,
-    listagem, atualização e exclusão de vendas.
 
-    Attributes:
-        repository (SaleRepository): O repositório responsável pela persistência de dados das vendas.
-    """
-
-    def __init__(self, repository: SaleRepository):
-        """
-        Args:
-            repository (SaleRepository): O repositório onde as vendas são armazenadas.
-        """
+    def __init__(self, repository: SaleRepository, client_service: ClientService, sandal_service: SandalService):
         self.repository = repository
+        self.client_service = client_service
+        self.sandal_service = sandal_service
 
     def create(self, sale: Sale) -> Sale:
-        """
-        Cria uma nova venda no repositório.
-
-        Args:
-            sale (Sale): A venda a ser criada.
-
-        Returns:
-            Sale: A venda criada, incluindo seu ID atribuído.
-
-        """
         return self.repository.create(sale)
 
     def search_sale(self, sale_id: int) -> Sale | None:
-        """
-        Busca uma venda pelo seu ID.
-
-        Args:
-            sale_id (int): O ID da venda a ser buscada.
-
-        Returns:
-            Sale | None: A venda correspondente ao ID fornecido, ou None se não encontrada.
-        """
         return self.repository.get_by_id(sale_id)
 
     def list(self) -> list[Sale]:
-        """
-        Lista todas as vendas.
-
-        Returns:
-            list[Sale]: Uma lista de todas as vendas no repositório.
-        """
-        return self.repository.list()
+        return [sale.to_dict() for sale in self.repository.list()]
 
     def update(self, sale_id: int, sale: Sale) -> Sale:
-        """
-        Atualiza os dados de uma venda existente.
-
-        Args:
-            sale_id (int): O ID da venda a ser atualizada.
-            sale (Sale): Os novos dados da venda.
-
-        Returns:
-            Sale: A venda atualizada.
-
-        Raises:
-            ValueError: Se a venda não for encontrada.
-        """
         return self.repository.update(sale)
 
     def delete(self, sale_id: int) -> bool:
-        """
-        Exclui uma venda pelo seu ID.
-
-        Args:
-            sale_id (int): O ID da venda a ser excluída.
-
-        Returns:
-            bool: True se a venda foi excluída com sucesso, False caso contrário.
-        """
         return self.repository.delete(sale_id)
 
     def count(self):
@@ -88,3 +34,19 @@ class SaleService:
             int: O número total de vendas.
         """
         return self.repository.count()
+
+    def sale_sandal_for_client(self, sale_id, sandal_id, client_id,quantity):
+        sale = self.repository.get_by_id(sale_id)
+        sandal = self.sandal_service.search_sandal(sandal_id)
+        client = self.client_service.search_client(client_id)
+        if not sale or not sandal or not client:
+            raise InvalidArgumentException("ids", f"sale{sale_id}, sandal={sandal}, client={client_id}")
+        sandal_sale = SandalSale(sandal_id=sandal_id, quantity=quantity, sale_id=sale_id)
+        return self.repository.add_sandal(sandal_sale)
+
+    def sandals_by_sale(self, sale_id):
+        sale = self.repository.get_by_id(sale_id)
+        if not sale:
+            raise NotFoundException(f"Sale not found id={sale_id}")
+        sandals = [self.sandal_service.search_sandal(sandalSale.sandal_id) for sandalSale in sale.sandalSales]
+        return sandals

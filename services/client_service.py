@@ -32,10 +32,7 @@ class ClientService:
             Client: O cliente criado com o ID atribuído.
         """
 
-        try:
-            return self.repository.create(client)
-        except Exception as e:
-            raise HTTPException(status_code=404, detail=f"Arquivo não encontrado: {str(e)}" )
+        return self.repository.create(client)
 
     def search_client(self, client_id: int) -> Client | None:
         """
@@ -47,10 +44,7 @@ class ClientService:
         Returns:
             Client | None: O cliente encontrado, ou `None` se o cliente não for encontrado.
         """
-        try:
-            return self.repository.get_by_id(client_id)
-        except Exception as e:
-            raise HTTPException(status_code=404, detail=f"Arquivo não encontrado: {str(e)}" )
+        return self.repository.get_by_id(client_id)
 
     def list(self) -> list[Client]:
         """
@@ -59,10 +53,7 @@ class ClientService:
         Returns:
             list[Client]: Lista de objetos `Client` com todos os clientes cadastrados.
         """
-        try:
-            return self.repository.list()
-        except Exception as e:
-            raise HTTPException(status_code=404, detail=f"Arquivo não encontrado: {str(e)}")
+        return self.repository.list()
 
     def update(self, client_id: int, client: Client) -> Client:
         """
@@ -79,11 +70,7 @@ class ClientService:
             ValueError: Se o cliente não for encontrado no repositório.
         """
         
-        try:
-            client.id = client_id
-            return self.repository.update(client)
-        except Exception as e:
-            raise HTTPException(status_code=404, detail=f"Arquivo não encontrado: {str(e)}")
+        return self.repository.update(client)
 
     def delete(self, client_id: int) -> bool:
         """
@@ -95,7 +82,4 @@ class ClientService:
         Returns:
             bool: `True` se o cliente foi excluído com sucesso, `False` caso contrário.
         """ 
-        try:
-            return self.repository.delete(client_id)
-        except Exception as e:
-            raise HTTPException(status_code=404, detail=f"Arquivo não encontrado: {str(e)}")
+        return self.repository.delete(client_id)

@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
+from sqlmodel import Session
 
 from models import Client
 from repositories import ClientRepository
 from services import ClientService
-from sqlmodel import Session
 from database.database import get_Session
 
 

@@ -42,7 +42,7 @@ class SandalService:
         Returns:
             Sandal | None: A sandália correspondente ao ID fornecido, ou None se não encontrada.
         """
-        return self.repository.search_por_id(sandal_id)
+        return self.repository.get_by_id(sandal_id)
 
     def list(self) -> list[Sandal]:
         """

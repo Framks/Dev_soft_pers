@@ -1,6 +1,7 @@
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
-from typing_extensions import runtime
 
+from exceptions import NotFoundException, OperationalException
 from models import Client
 
 
@@ -30,10 +31,14 @@ class ClientRepository:
         Returns:
             Client: O cliente criado com um ID atribuído.
         """
-        self.session.add(client)
-        self.session.commit()
-        self.session.refresh(client)
-        return client
+        try:
+            self.session.add(client)
+            self.session.commit()
+            self.session.refresh(client)
+            return client
+        except Exception as e:
+            self.session.rollback()
+            raise OperationalException(str(e))
 
     def get_by_id(self, client_id: int) -> Client | None:
         """
@@ -47,8 +52,8 @@ class ClientRepository:
         """
         try:
             return self.session.get(Client, client_id)
-        except IndexError:
-            return None
+        except IndexError as e:
+            raise NotFoundException(str(e))
 
     def update(self, client: Client) -> Client:
         """
@@ -63,15 +68,16 @@ class ClientRepository:
         Raises:
             ValueError: Se o cliente não for encontrado.
         """
-        client_before = self.get_by_id(client.id)
-        if not client_before:
-            raise runtime("nao encontrado")
-        for key, value in client.model_dump().items():
-            setattr(client_before, key, value)
-        self.session.commit()
-        return client_before
+        try:
+            client_before = self.get_by_id(client.id)
+            for key, value in client.model_dump().items():
+                setattr(client_before, key, value)
+            self.session.commit()
+            return client_before
+        except NotFoundException as e:
+            raise NotFoundException(f"cliente com id {client.id} não encontrado")
 
-    def delete(self, client_id: int) -> Client:
+    def delete(self, client_id: int) -> Client | None:
         """
         Exclui um cliente pelo ID do arquivo CSV.
 
@@ -81,11 +87,13 @@ class ClientRepository:
         Returns:
             bool: `True` se o cliente foi excluído com sucesso, `False` caso contrário.
         """
-        user = self.session.get(Client, client_id)
-        if user:
+        try:
+            user = self.session.get(Client, client_id)
             self.session.delete(user)
             self.session.commit()
-        return user
+            return user
+        except Exception as e:
+            raise NotFoundException(str(e))
 
     def list(self):
         """
@@ -96,5 +104,5 @@ class ClientRepository:
         """
         try:
             return self.session.exec(select(Client)).all()
-        except FileNotFoundError:
-            return []
+        except Exception as e:
+            return OperationalException(str(e))
