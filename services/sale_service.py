@@ -41,7 +41,7 @@ class SaleService:
         Returns:
             Sale | None: A venda correspondente ao ID fornecido, ou None se não encontrada.
         """
-        return self.repository.search_por_id(sale_id)
+        return self.repository.get_by_id(sale_id)
 
     def list(self) -> list[Sale]:
         """

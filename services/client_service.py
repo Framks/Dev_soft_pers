@@ -48,7 +48,7 @@ class ClientService:
             Client | None: O cliente encontrado, ou `None` se o cliente não for encontrado.
         """
         try:
-            return self.repository.search_por_id(client_id)
+            return self.repository.get_by_id(client_id)
         except Exception as e:
             raise HTTPException(status_code=404, detail=f"Arquivo não encontrado: {str(e)}" )
 
@@ -84,7 +84,6 @@ class ClientService:
             return self.repository.update(client)
         except Exception as e:
             raise HTTPException(status_code=404, detail=f"Arquivo não encontrado: {str(e)}")
-
 
     def delete(self, client_id: int) -> bool:
         """

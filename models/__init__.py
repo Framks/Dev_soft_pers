@@ -1,3 +1,4 @@
-from .client import Client as Client
-from .sandal import Sandal as Sandal
-from .sale import Sale as Sale
+from .client import Client
+from .sandal import Sandal
+from .sale import Sale
+from .sandalSale import SandalSale

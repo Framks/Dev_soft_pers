@@ -1,11 +1,8 @@
-from pydantic import BaseModel
-from typing import List
-
-from models.client import Client
-from models.sandal import Sandal
+from sqlmodel import SQLModel, Field, Relationship
+from typing import List, Optional
 
 
-class Sale(BaseModel):
+class Sale(SQLModel, table=True):
     """
     Modelo para representar uma venda.
 
@@ -15,8 +12,8 @@ class Sale(BaseModel):
         valor_total (float): Valor total da venda.
         produtos (List[Sandal]): Lista de sandálias (produtos) associadas à venda.
     """
-
-    id: int
-    client: Client
+    id: Optional[int] = Field(default=None, primary_key=True)
+    client_id: int = Field(foreign_key="client.id")
     valor_total: float
-    produtos: List[Sandal]
+    sandalSales: List["SandalSale"] = Relationship(back_populates="sale")
+    client: "Client" = Relationship(back_populates="sales")

@@ -1,7 +1,8 @@
-from pydantic import BaseModel
+from sqlmodel import SQLModel, Field, Relationship
+from typing import List, Optional
 
 
-class Sandal(BaseModel):
+class Sandal(SQLModel, table=True):
     """
     Modelo para representar uma sandália.
 
@@ -9,16 +10,15 @@ class Sandal(BaseModel):
         id (int): Identificador único da sandália.
         codigo (str): Código único da sandália.
         nome (str): Nome da sandália.
-        quantidade (int): Quantidade de sandálias em estoque.
         valor (float): Preço da sandália.
         cor (str): Cor da sandália.
         tamanho (int): Tamanho da sandália.
     """
 
-    id: int
+    id: Optional[int] = Field(default=None, primary_key=True)
     codigo: str
     nome: str
-    quantidade: int
     valor: float
     cor: str
     tamanho: int
+    sandalSales: List["SandalSale"] = Relationship(back_populates="sandal")

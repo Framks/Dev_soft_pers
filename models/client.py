@@ -1,7 +1,8 @@
-from pydantic import BaseModel
+from sqlmodel import SQLModel, Field, Relationship
+from typing import List, Optional
 
 
-class Client(BaseModel):
+class Client(SQLModel, table=True):
     """
     Modelo para representar um cliente.
 
@@ -12,25 +13,8 @@ class Client(BaseModel):
         endereco (str): Endereço do cliente.
     """
 
-    id: int | None = None
+    id: Optional[int] = Field(default=None, primary_key=True)
     nome: str
     celular: str
     endereco: str
-
-    @staticmethod
-    def from_dict(data: dict):
-        """
-        Cria uma instância de `Client` a partir de um dicionário.
-
-        Args:
-            data (dict): Dicionário contendo os dados do cliente.
-
-        Returns:
-            Client: Instância do cliente criada com os dados fornecidos.
-        """
-        return Client(
-            id=data.get("id"),
-            nome=data.get("nome"),
-            celular=str(data.get("celular")),
-            endereco=data.get("endereco"),
-        )
+    sales: List["Sale"] = Relationship(back_populates="client")
