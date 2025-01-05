@@ -1,8 +1,12 @@
+from datetime import datetime
+
 from sqlalchemy.sql.functions import count
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
+from random import randint, sample, choice, uniform
+from datetime import datetime, timedelta
 
 from exceptions import OperationalException, NotFoundException
-from models import Sale, SandalSale
+from models import Sale, SandalSale, Sandal, Client
 
 
 class SaleRepository:
@@ -84,3 +88,24 @@ class SaleRepository:
 
     def count_date(self, init_date, fin_date):
         return self.session.exec(select(count(Sale.id)).where((Sale.sale_date >= init_date) & (Sale.sale_date <= fin_date))).one()
+
+    def media_quantity_sale(self, start_date: datetime, end_date: datetime):
+        sub_search= (
+            select(SandalSale.sale_id, func.sum(SandalSale.quantity).label("quantity_sale"))
+            .join(Sale, Sale.id == SandalSale.sale_id)
+            .where(Sale.sale_date.between(start_date, end_date))
+            .group_by(SandalSale.sale_id)
+            .subquery()
+        )
+        result = self.session.exec(select(func.avg(sub_search.c.quantity_sale).label("media_quantity_sale"))).first()
+        return result
+
+    def media_quantity_sale_all(self):
+        sub_search= (
+            select(SandalSale.sale_id, func.sum(SandalSale.quantity).label("quantity_sale"))
+            .join(Sale, Sale.id == SandalSale.sale_id)
+            .group_by(SandalSale.sale_id)
+            .subquery()
+        )
+        result = self.session.exec(select(func.avg(sub_search.c.quantity_sale).label("media_quantity_sale"))).first()
+        return result

@@ -75,3 +75,19 @@ class SaleService:
         sale.finished = True
         self.repository.update(sale)
         return sale
+
+    def media_sale_date(self, start_date, end_date):
+        try:
+            start = datetime.strptime(start_date, "%Y-%m-%d")
+            end = datetime.strptime(end_date, "%Y-%m-%d")
+            return self.repository.media_quantity_sale(start, end)
+        except ValueError:
+            raise InvalidArgumentException("Invalid date")
+
+    def media_quantity_sandal(self, start_date, end_date):
+        if start_date and end_date:
+            start = datetime.strptime(start_date, "%Y-%m-%d")
+            end = datetime.strptime(end_date, "%Y-%m-%d")
+            return self.repository.media_quantity_sale(start, end)
+        else:
+            return self.repository.media_quantity_sale_all()

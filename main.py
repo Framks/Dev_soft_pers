@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi.exceptions import ValidationException
 
-from controllers import router_client, sale_router, sandal_router
+from routers import router_client, sale_router, sandal_router
 from database.database import create_db_and_tables
 from exceptions import not_found_exception, invalid_argument_exception, InvalidArgumentException, OperationalException, \
     NotFoundException, operational_exception, validation_exception_handle, exception_handle

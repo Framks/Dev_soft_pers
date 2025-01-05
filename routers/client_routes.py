@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy import String
 from sqlmodel import Session
 
 from models import Client

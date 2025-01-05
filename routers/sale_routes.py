@@ -104,3 +104,7 @@ def revomer_sandal_sale(sale_id: int, sandal_id: int, service = Depends(get_sale
 @sale_router.put("/{sale_id}/finished")
 def finished_sale(sale_id: int, service = Depends(get_sale_service)):
     return service.finished_sale(sale_id)
+
+@sale_router.get("/media_quantity/")
+def media_quantity_sandal(start_date = None, end_date = None, service = Depends(get_sale_service)):
+    return service.media_quantity_sandal(start_date, end_date)
