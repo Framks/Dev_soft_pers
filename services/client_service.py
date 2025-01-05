@@ -46,14 +46,16 @@ class ClientService:
         """
         return self.repository.get_by_id(client_id)
 
-    def list(self) -> list[Client]:
+    def list(self, skip, limit, name_part) -> list[Client]:
         """
         Lista todos os clientes.
 
         Returns:
             list[Client]: Lista de objetos `Client` com todos os clientes cadastrados.
         """
-        return self.repository.list()
+        if name_part:
+            return self.repository.list_name(skip, limit, name_part)
+        return self.repository.list(skip,limit)
 
     def update(self, client_id: int, client: Client) -> Client:
         """

@@ -1,10 +1,10 @@
 import csv
 from typing import Optional, List
 
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 
 from exceptions import OperationalException, NotFoundException
-from models import Sandal
+from models import Sandal, SandalSale, Sale
 
 
 class SandalRepository:
@@ -78,7 +78,7 @@ class SandalRepository:
             self.session.rollback()
             raise NotFoundException(str(e))
 
-    def list(self):
+    def list(self, skip, limit):
         """
         Lista todas as sandálias armazenadas no arquivo CSV.
 
@@ -86,6 +86,24 @@ class SandalRepository:
             List[Sandal]: Lista de objetos `Sandal` com todas as sandálias encontradas.
         """
         try:
-            return self.session.exec(select(Sandal)).all()
+            return self.session.exec(select(Sandal).offset(skip).limit(limit)).all()
         except Exception as e:
             raise OperationalException(str(e))
+
+    def list_by_name(self, skip, limit, part_name):
+        try:
+            search = f"%{part_name}%"
+            return self.session.exec(select(Sandal).where(Sandal.nome.like(search)).offset(skip).limit(limit)).all()
+        except Exception as e:
+            raise OperationalException(str(e))
+
+    def quantity_by_name(self, start, fim, ):
+        statement = (
+            select(Sandal.nome, func.sum(SandalSale.quantity).label("total_vendido"))
+            .join(SandalSale, Sandal.id == SandalSale.sandal_id)
+            .join(Sale, Sale.id == SandalSale.sale_id)
+            .where(Sale.sale_date.between(start, fim))
+            .group_by(Sandal.nome)
+            .order_by(func.sum(SandalSale.quantity).desc())
+        )
+        return self.session.exec(statement).all()

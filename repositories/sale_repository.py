@@ -48,9 +48,9 @@ class SaleRepository:
             self.session.rollback()
             raise NotFoundException(str(e))
 
-    def list(self):
+    def list(self, skip, limit):
         try:
-            return self.session.exec(select(Sale)).all()
+            return self.session.exec(select(Sale).offset(skip).limit(limit)).all()
         except Exception as e:
             raise OperationalException(str(e))
 
@@ -66,6 +66,21 @@ class SaleRepository:
 
     def count(self):
         try:
-            return self.session.exec(select(count(Sale.id))).all()
+            return self.session.exec(select(count(Sale.id))).one()
         except Exception as e:
             raise OperationalException(str(e))
+
+    def delete_sandalSale(self, sandal_sale: SandalSale):
+        try:
+            self.session.delete(sandal_sale)
+            self.session.commit()
+            return True
+        except Exception as e:
+            self.session.rollback()
+            raise OperationalException(str(e))
+
+    def get_sandalSale(self, sandalSale_id: int):
+        return self.session.get(SandalSale, sandalSale_id)
+
+    def count_date(self, init_date, fin_date):
+        return self.session.exec(select(count(Sale.id)).where((Sale.sale_date >= init_date) & (Sale.sale_date <= fin_date))).one()

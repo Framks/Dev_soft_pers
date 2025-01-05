@@ -26,14 +26,14 @@ def create_sandal(sandal: Sandal, service = Depends(get_sandal_service)):
     return service.create(sandal)
 
 @sandal_router.get("/")
-def list_sandal(service: SandalService = Depends(get_sandal_service)):
+def list_sandal(skip:int=0,limit:int=10, part_name=None, service: SandalService = Depends(get_sandal_service)):
     """
     Lista todas as sandálias.
 
     Returns:
         List[object]: Lista de sandálias cadastradas.
     """
-    return service.list()
+    return service.list(skip,limit,part_name)
 
 @sandal_router.get("/{sandal_id}")
 def search_sandal_id(sandal_id: int, service: SandalService = Depends(get_sandal_service)):

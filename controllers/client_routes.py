@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from sqlalchemy import String
 from sqlmodel import Session
 
 from models import Client
@@ -27,14 +28,14 @@ def create_client( client: Client, service: ClientService = Depends(get_client_s
     return service.create(client)
 
 @router_client.get("/")
-def list_client(service: ClientService = Depends(get_client_service)):
+def list_client(skip: int = 0, limit: int= 10, name_part = None,service: ClientService = Depends(get_client_service)):
     """
     Lista todos os clientes.
 
     Returns:
         List[object]: Lista de clientes cadastrados.
     """
-    return service.list()
+    return service.list(skip, limit, name_part)
 
 @router_client.get("/{client_id}", response_model=Client)
 def search_client_id(client_id: int, service: ClientService = Depends(get_client_service)):

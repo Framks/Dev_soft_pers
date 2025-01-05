@@ -44,14 +44,16 @@ class SandalService:
         """
         return self.repository.get_by_id(sandal_id)
 
-    def list(self) -> list[Sandal]:
+    def list(self, skip, limit, part_name) -> list[Sandal]:
         """
         Lista todas as sandálias.
 
         Returns:
             list[Sandal]: Uma lista de todas as sandálias no repositório.
         """
-        return self.repository.list()
+        if part_name:
+            return self.repository.list_by_name(skip, limit,part_name)
+        return self.repository.list(skip,limit)
 
     def update(self, sandal_id: int, sandal: Sandal) -> Sandal:
         """

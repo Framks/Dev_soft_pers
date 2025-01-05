@@ -95,7 +95,7 @@ class ClientRepository:
         except Exception as e:
             raise NotFoundException(str(e))
 
-    def list(self):
+    def list(self, skip, limit):
         """
         Lista todos os clientes armazenados no arquivo CSV.
 
@@ -103,6 +103,13 @@ class ClientRepository:
             List[Client]: Lista de objetos `Client` com todos os clientes encontrados.
         """
         try:
-            return self.session.exec(select(Client)).all()
+            return self.session.exec(select(Client).offset(skip).limit(limit)).all()
+        except Exception as e:
+            return OperationalException(str(e))
+
+    def list_name(self, skip, limit, name_part):
+        try:
+            search_term = f"%{name_part}%"
+            return self.session.exec(select(Client).where(Client.name.like(search_term)).offset(skip).limit(limit)).all()
         except Exception as e:
             return OperationalException(str(e))

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
@@ -26,14 +28,14 @@ def create_sale( sale: Sale,service = Depends(get_sale_service)):
     return service.create(sale)
 
 @sale_router.get("/")
-def list_sale(service = Depends(get_sale_service)):
+def list_sale(skip:int=0, limit:int=10,service = Depends(get_sale_service)):
     """
     Lista todas as vendas.
 
     Returns:
         List[object]: Lista de vendas cadastradas.
     """
-    return service.list()
+    return service.list(skip, limit)
 
 @sale_router.get("/{sale_id}")
 def search_sale_id( sale_id: int,service = Depends(get_sale_service)):
@@ -75,15 +77,17 @@ def delete_sale(sale_id: int, service = Depends(get_sale_service)):
     """
     return service.delete(sale_id)
 
-@sale_router.get("/total")
-def count_sales(service = Depends(get_sale_service)):
+@sale_router.get("/count/total")
+def count_sales(init_date = None,fin_date= None,service = Depends(get_sale_service)):
     """
     Conta o número total de vendas registradas.
+
+    INIT AND FIN: FORMATO YYYY-MM-DD
 
     Returns:
         int: Total de vendas registradas.
     """
-    return service.count()
+    return service.count(init_date, fin_date)
 
 @sale_router.post("/{sale_id}/sandals/{sandal_id}/client/{client_id}")
 def sale_sandal_for_client(sale_id: int,sandal_id: int,  client_id: int,quantity: int, service = Depends(get_sale_service)):
@@ -92,3 +96,11 @@ def sale_sandal_for_client(sale_id: int,sandal_id: int,  client_id: int,quantity
 @sale_router.get("/{sale_id}/sandals/")
 def sandals_by_sale(sale_id: int, service = Depends(get_sale_service)):
     return service.sandals_by_sale(sale_id)
+
+@sale_router.delete("/{sale_id}/sandals/{sandal_id}")
+def revomer_sandal_sale(sale_id: int, sandal_id: int, service = Depends(get_sale_service)):
+    return service.revomer_sandal_sale(sale_id, sandal_id)
+
+@sale_router.put("/{sale_id}/finished")
+def finished_sale(sale_id: int, service = Depends(get_sale_service)):
+    return service.finished_sale(sale_id)
