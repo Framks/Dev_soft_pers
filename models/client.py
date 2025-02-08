@@ -1,10 +1,14 @@
 from sqlmodel import SQLModel, Field, Relationship
-from typing import List, Optional
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .sale import Sale
 
 
-class Client(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    nome: str
-    celular: str
-    endereco: str
-    sales: List["Sale"] = Relationship(back_populates="client")
+class ClientBase(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str
+    email: str
+
+
+class Client(ClientBase, table=True):
+    sales: list['Sale'] = Relationship(back_populates="client")

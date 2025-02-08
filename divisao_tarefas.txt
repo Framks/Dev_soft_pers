@@ -1,0 +1,27 @@
+
+Projeto de Back-End para Gerenciamento de Vendas de Sandálias
+------------------------------------------------------------
+
+## Escopo
+Desenvolvimento de uma aplicação que implementa endpoints CRUD para cada entidade (clientes, sandálias e vendas).
+
+## Equipe
+- Francisco Gabriel - 497357
+- Maria Elissa - 552674
+
+## Principais Atividades
+1. **Models**:
+   - Sandal: Responsável - Maria
+   - Client: Responsável - Maria
+   - Sale: Responsável - Francisco
+
+2. **Services**:
+   - Sandal: Responsável - Maria
+   - Sale: Responsável - Francisco
+   - Client: Responsável - Francisco
+
+4. **Routes**:
+   - Sandal: Responsável - Francisco
+   - Client: Responsável - Maria
+   - Sale: Responsável - Maria
+   - Home: Responsável - Francisco

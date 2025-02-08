@@ -1,12 +1,17 @@
 from sqlmodel import SQLModel, Field, Relationship
-from typing import List, Optional
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .sale import SandalSale
 
 
-class Sandal(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+class SandalBase(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
     codigo: str
     nome: str
     valor: float
     cor: str
     tamanho: int
-    sandalSales: List["SandalSale"] = Relationship(back_populates="sandal")
+
+
+class Sandal(SandalBase, table=True):
+    sandal_sales: list['SandalSale'] = Relationship(back_populates="sandal")

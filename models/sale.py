@@ -1,37 +1,41 @@
-from datetime import datetime
-
+from datetime import datetime, timezone
 from sqlmodel import SQLModel, Field, Relationship
-from typing import List, Optional
+
+from .client import Client, ClientBase
+from .sandal import Sandal, SandalBase
 
 
-class Sale(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    client_id: int = Field(foreign_key="client.id")
+class SandalSaleBase(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    quantity: int = Field(default=1)
+    
+    
+class SandalSale(SandalSaleBase, table=True):
+    sale_id: int = Field(default=None, foreign_key="sale.id",)
+    sandal_id: int = Field(default=None, foreign_key="sandal.id")
+    sandal: 'Sandal' = Relationship(back_populates="sandal_sales")
+    sale: 'Sale' = Relationship(back_populates="sandal_sales")
+
+
+class SandalSaleWithSandal(SandalSaleBase):
+    sandal: SandalBase | None
+
+
+
+
+class SaleBase(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
     finished: bool
+    sale_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     valor_total: float
-    sale_date : datetime
-    sandalSales: List["SandalSale"] = Relationship(back_populates="sale")
-    client: "Client" = Relationship(back_populates="sales")
+    
 
-    def to_dict(self):
-        """Converte o objeto Sale para um dicionário incluindo relacionamentos."""
-        return {
-            "id": self.id,
-            "client_id": self.client_id,
-            "sade_date":self.sale_date.strftime("%d/%m/%Y"),
-            "valor_total": self.valor_total,
-            "sandalSales": [
-                {
-                    "id": sandal_sale.id,
-                    "sandal_id": sandal_sale.sandal_id,
-                    "quantity": sandal_sale.quantity,
-                }
-                for sandal_sale in self.sandalSales
-            ],
-            "client": {
-                "id": self.client.id,
-                "nome": self.client.nome,
-                "celular": self.client.celular,
-                "endereco": self.client.endereco,
-            } if self.client else None,
-        }
+class Sale(SaleBase, table=True):
+    client_id: int = Field(foreign_key="client.id")
+    client: 'Client' = Relationship(back_populates="sales")
+    sandal_sales: list[SandalSale] = Relationship(back_populates="sale")
+
+
+class SaleWithClientSandals(SaleBase):
+    client: ClientBase | None
+    sandal_sales: list[SandalSaleWithSandal]
