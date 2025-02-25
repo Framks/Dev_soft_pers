@@ -1,0 +1,33 @@
+#[MermaidChart: 8c47ac00-2b7f-4704-adcb-1fb5dbe33ab8]
+
+classDiagram
+    direction RL
+    class Client{
+        id:int
+        name:str
+        email:str
+    }
+
+    class Sale{
+        id: int
+        valor_total: float
+        finished: bool
+    }
+
+    class Sandal{
+        id: int
+        codigo: str
+        nome: str
+        valor: float
+        cor: str
+        tamanho: int
+    }
+
+    class SandalSale{
+        id: int
+        quantity: int
+    }
+
+    Client "1" *-- "*" Sale
+    SandalSale "*" --* "1" Sandal
+    Sale "1" -- "*" SandalSale

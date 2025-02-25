@@ -1,15 +1,14 @@
 from fastapi import FastAPI
-from contextlib import asynccontextmanager
+import logging
 
-from database import create_db_and_tables
-from routes import home, client, sale, sandal
+from src.routes import home, sale, sandal, client
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    create_db_and_tables()
-    yield
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 app.include_router(home.router)
 app.include_router(client.router)

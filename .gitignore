@@ -1,4 +1,5 @@
 .venv
 .env
 .idea
-divisao_tarefas.txt
+/__pycache__
+*.pyc
