@@ -85,10 +85,20 @@ async def count_date(init_date, fin_date, engine: AIOEngine):
         result = None
 
         if init_date and fin_date:
-            start = ( init_date if isinstance(init_date, datetime) else datetime.strptime(init_date, "%Y-%m-%d"))
-            end = ( fin_date if isinstance(fin_date, datetime) else datetime.strptime(fin_date, "%Y-%m-%d") )
+            start = (
+                init_date
+                if isinstance(init_date, datetime)
+                else datetime.strptime(init_date, "%Y-%m-%d")
+            )
+            end = (
+                fin_date
+                if isinstance(fin_date, datetime)
+                else datetime.strptime(fin_date, "%Y-%m-%d")
+            )
 
-            result = await engine.count(Sale, Sale.sale_date >= start, Sale.sale_date <= end)
+            result = await engine.count(
+                Sale, Sale.sale_date >= start, Sale.sale_date <= end
+            )
         else:
             result = await engine.count(Sale)
 
@@ -100,8 +110,6 @@ async def count_date(init_date, fin_date, engine: AIOEngine):
 
 
 async def media_quantity_sandal(
-    start_date: datetime, 
-    end_date: datetime, 
     engine: AIOEngine
 ):
     try:
@@ -110,12 +118,7 @@ async def media_quantity_sandal(
             {"$group": {"_id": None, "average_quantity": {"$avg": "$total_quantity"}}},
             {"$project": {"_id": 0, "average_quantity": 1}},
         ]
-
-        if start_date and end_date:
-            pipeline.insert(0,{"$match":{"sandalSales.date": { "$gte": start_date,"$lte": end_date}}})
-        
         result = await engine.get_collection(Sale).aggregate(pipeline).to_list()
-        
         return result[0]
     except Exception as e:
         raise HTTPException(detail=str(e), status_code=400)

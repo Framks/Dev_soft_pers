@@ -5,7 +5,6 @@ from src.models.sale import Sale
 from database import get_engine
 from src.services import sale
 from src.constants.constants import MAX_LENGTH_LIMIT
-from datetime import date
 
 router = APIRouter(prefix="/sales", tags=["sales"])
 
@@ -67,8 +66,6 @@ async def finished_sale(sale_id: str, engine=Depends(get_engine)):
 
 @router.get("/media_quantity/sandals")
 async def media_quantity_sandal(
-    start_date: date = Query(None, ge=date(2023, 1, 1), le=date(2024, 12, 31)),
-    end_date: date = Query(None, ge=date(2023, 1, 1), le=date(2024, 12, 31)),
     engine=Depends(get_engine),
 ):
     """
@@ -82,7 +79,7 @@ async def media_quantity_sandal(
     Returns:
         Quantidade média de sandálias por venda.
     """
-    return await sale.media_quantity_sandal(start_date, end_date, engine)
+    return await sale.media_quantity_sandal(engine)
 
 
 @router.get("/count/total")

@@ -9,4 +9,3 @@ class Sandal(Model):
     cor: Optional[str]
     tamanho: Optional[int]
     marca: Optional[str]
-    url_imagem: Optional[str]

@@ -11,7 +11,7 @@ class SandalSale(Model):
 
 
 class Sale(Model):
-    finished: Optional[bool]
+    finished: Optional[bool] = False
     sale_date: Optional[datetime]
     valor_total: Optional[float]
     client: Client = Reference()

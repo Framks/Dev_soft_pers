@@ -32,12 +32,8 @@ async def read_sandal(sandal_id: str, engine: AIOEngine = Depends(get_engine)):
 
 
 @router.put("/{sandal_id}", response_model=Sandal)
-async def update_sandal(
-    sandal_id: str, sandal_put: Sandal, engine: AIOEngine = Depends(get_engine)
-):
-    return await sandal.update(
-        sandal_id=sandal_id, sandal_put=sandal_put, engine=engine
-    )
+async def update_sandal(sandal_id: str, sandal_put: Sandal, engine: AIOEngine = Depends(get_engine)):
+    return await sandal.update(sandal_id=sandal_id, sandal_put=sandal_put, engine=engine)
 
 
 @router.delete("/{sandal_id}")
